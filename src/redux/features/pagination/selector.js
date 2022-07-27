@@ -1,0 +1,1 @@
+export const getPages = (state) => state.pagination.pages 

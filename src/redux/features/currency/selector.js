@@ -1,0 +1,1 @@
+export const getCurrentCurrency = (state) => state.currency.currentCurrency 
