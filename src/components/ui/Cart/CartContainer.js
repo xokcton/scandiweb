@@ -89,9 +89,21 @@ export const CartContainer = styled.div`
           }
         }
         .success {
+          cursor: pointer;
+          width: 140px;
+          height: 45px;
+          text-transform: uppercase;
+          outline: none;
+          transition: all 0.2s ease-in-out;
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 13px;
           background-color: #5ECE7B;
           color: #fff;
           border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           &:hover {
             background-color: #237337;
           }

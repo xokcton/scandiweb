@@ -49,7 +49,10 @@ export const CartPageContainer = styled.div`
         color: #1D1F22;
         font-weight: 700;
       }
-      button {
+      .lastItemWithButtons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 280px;
         height: 45px;
         outline: none;
@@ -58,6 +61,7 @@ export const CartPageContainer = styled.div`
         border: 1px solid #1D1F22;
         color: #1D1F22;
         text-transform: capitalize;
+        text-decoration: none;
         font-size: 18px;
         transition: all 0.2s ease-in-out;
         &:hover {

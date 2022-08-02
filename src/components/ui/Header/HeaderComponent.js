@@ -17,12 +17,14 @@ export const HeaderComponent = styled.div`
     padding: 0px;
     width: 234px;
     height: 56px;
-    div {
+    .categoryLink {
       text-align: center;
       padding: 5px 10px 20px;
       font-weight: 500;
       text-transform: uppercase;
-      transition: all 0.5s ease-in-out;
+      transition: all 0.3s ease-in-out;
+      text-decoration: none;
+      color: #000;
       &.active {
         color: #5ECE7B;
         border-bottom: 1px solid #5ECE7B;

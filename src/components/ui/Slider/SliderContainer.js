@@ -5,6 +5,7 @@ export const SliderContainer = styled.div`
     width: 100px;
     height: 190px;
     position: relative;
+    overflow: hidden;
     img {
       width: 100%;
       height: 100%;

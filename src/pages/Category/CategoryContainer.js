@@ -70,6 +70,8 @@ export const CategoryContainer = styled.div`
       }
     }
     .wrapper {
+      text-decoration: none;
+      color: #000;
       position: relative;
       max-width: 388px;
       max-height: 430px;
