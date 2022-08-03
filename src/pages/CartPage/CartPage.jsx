@@ -1,13 +1,10 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
-import { withUseDispatch, withUseSelector } from "components/hoc";
-import { getCart } from "redux/features/cart/selector";
-import { nestedWithUseSelector } from "components/hoc/useSelector";
-import { getCurrentCurrency } from "redux/features/currency/selector";
 import { getTotalAmount, getTotalPrice } from "utils";
 import { clearItems } from "redux/features/cart/slice";
 import { List } from "components/ui";
+import { store } from "redux/store";
 
 import { CartPageContainer } from "./CartPageContainer";
 
@@ -16,7 +13,7 @@ const TAX = 21;
 class CartPage extends Component {
   #utilityFunction = () => {
     localStorage.removeItem("cartItems");
-    this.props.dispatch(clearItems());
+    store.dispatch(clearItems());
   };
 
   handleOrder = () => {
@@ -34,25 +31,25 @@ class CartPage extends Component {
   };
 
   render() {
-    const totalAmount = getTotalAmount(this.props.selectorValue.slice());
+    const totalAmount = getTotalAmount(store.getState().cart.items.slice());
     const totalPrice = getTotalPrice(
-      this.props.selectorValue.slice(),
-      this.props.nestedSelectorValue.label,
+      store.getState().cart.items.slice(),
+      store.getState().currency.currentCurrency.label,
     );
 
     return (
       <CartPageContainer>
         <div className="header">cart</div>
-        {this.props.selectorValue.length > 0 ? (
+        {store.getState().cart.items.length > 0 ? (
           <div className="innerPart">
             <div className="cartItemsList">
-              <List currentCurrency={this.props.nestedSelectorValue} />
+              <List currentCurrency={store.getState().currency.currentCurrency} />
             </div>
             <div className="summary">
               <div>
                 <p>Tax {TAX}%:</p>
                 <b>
-                  {this.props.nestedSelectorValue.symbol}
+                  {store.getState().currency.currentCurrency.symbol}
                   {((totalPrice / 100) * TAX).toFixed(2)}
                 </b>
               </div>
@@ -63,14 +60,14 @@ class CartPage extends Component {
               <div>
                 <p>Total Price:</p>
                 <b>
-                  {this.props.nestedSelectorValue.symbol}
+                  {store.getState().currency.currentCurrency.symbol}
                   {totalPrice.toFixed(2)}
                 </b>
               </div>
               <div>
                 <p>Price With Tax:</p>
                 <b>
-                  {this.props.nestedSelectorValue.symbol}
+                  {store.getState().currency.currentCurrency.symbol}
                   {((totalPrice / 100) * TAX + totalPrice).toFixed(2)}
                 </b>
               </div>
@@ -90,9 +87,9 @@ class CartPage extends Component {
         ) : (
           <div className="nothingToShow">
             Nothing to show...{" "}
-            <b className="goBack" onClick={() => this.props.navigate("/")}>
+            <Link to="/" className="goBack">
               Go back to the main page?
-            </b>
+            </Link>
           </div>
         )}
       </CartPageContainer>
@@ -100,6 +97,4 @@ class CartPage extends Component {
   }
 }
 
-export default withUseDispatch(
-  nestedWithUseSelector(withUseSelector(CartPage, getCart), getCurrentCurrency),
-);
+export default CartPage;

@@ -2,11 +2,10 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
 import { Currencies, Cart } from "components/ui";
-import { withUseDispatch, withUseSelector } from "components/hoc";
 import { GET_CATEGORIES_NAMES } from "apollo/queries/categories";
 import { setCurrentCategory, setAllCategories } from "redux/features/category/slice";
-import { getCategory } from "redux/features/category/selector";
 import { client } from "apollo";
+import { store } from "redux/store";
 
 import { HeaderComponent } from "./HeaderComponent";
 import Logo from "assets/logo.png";
@@ -16,12 +15,11 @@ class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      headerCategory: this.props.selectorValue.current,
+      headerCategory: store.getState().category.categories.current,
       loading: true,
       error: false,
       data: [],
     };
-    this.dispatch = this.props.dispatch;
   }
 
   componentDidMount() {
@@ -45,26 +43,30 @@ class Header extends Component {
       all: d,
     };
     localStorage.setItem("currentCategory", JSON.stringify(data));
-    this.dispatch(setCurrentCategory(data.current));
-    this.dispatch(setAllCategories(data.all));
+    store.dispatch(setCurrentCategory(data.current));
+    store.dispatch(setAllCategories(data.all));
     localStorage.removeItem("singleProduct");
     localStorage.removeItem("currentProductAttrs");
+    localStorage.removeItem("partialData");
+    localStorage.removeItem("pages");
   }
 
   handleLogoClick = () => {
     localStorage.removeItem("singleProduct");
     localStorage.removeItem("currentProductAttrs");
+    localStorage.removeItem("partialData");
+    localStorage.removeItem("pages");
   };
 
   configureCategories = (value) => {
-    if (!this.props.selectorValue.all.length) {
+    if (!store.getState().category.categories.all.length) {
       const d = {
         current: 0,
         all: value,
       };
       localStorage.setItem("currentCategory", JSON.stringify(d));
-      this.dispatch(setCurrentCategory(d.current));
-      this.dispatch(setAllCategories(d.all));
+      store.dispatch(setCurrentCategory(d.current));
+      store.dispatch(setAllCategories(d.all));
     }
   };
 
@@ -109,4 +111,4 @@ class Header extends Component {
   }
 }
 
-export default withUseDispatch(withUseSelector(Header, getCategory));
+export default Header;

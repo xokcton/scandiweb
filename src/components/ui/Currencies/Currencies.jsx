@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 
-import { withUseDispatch } from "components/hoc";
 import { GET_CURRENCIES } from "apollo/queries/currencies";
 import { setCurrency } from "redux/features/currency/slice";
 import { client } from "apollo";
+import { store } from "redux/store";
 
 import Loader from "assets/loader.gif";
 import Arrow from "assets/arrow.png";
@@ -20,7 +20,6 @@ class Currencies extends Component {
     };
     this.currencyRef = React.createRef(null);
     this.handleClickOutside = undefined;
-    this.dispatch = this.props.dispatch;
   }
 
   componentDidMount() {
@@ -57,7 +56,7 @@ class Currencies extends Component {
       label: data.label,
       symbol: data.symbol,
     };
-    this.dispatch(setCurrency(currentCurrency));
+    store.dispatch(setCurrency(currentCurrency));
     localStorage.setItem("currentCurrency", JSON.stringify(currentCurrency));
   };
 
@@ -97,4 +96,4 @@ class Currencies extends Component {
   }
 }
 
-export default withUseDispatch(Currencies);
+export default Currencies;

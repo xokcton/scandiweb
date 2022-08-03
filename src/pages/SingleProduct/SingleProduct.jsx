@@ -2,11 +2,10 @@ import React, { Component } from "react";
 import { Interweave } from "interweave";
 
 import { GET_PRODUCT } from "apollo/queries/product";
-import { withUseDispatch, withUseSelector } from "components/hoc";
-import { getCurrentCurrency } from "redux/features/currency/selector";
 import { generateId, checkAttrs } from "utils/";
 import { addProduct } from "redux/features/cart/slice";
 import { client } from "apollo";
+import { store } from "redux/store";
 
 import { SingleProductContainer } from "./SingleProductContainer";
 import Loader from "assets/loader.gif";
@@ -24,7 +23,6 @@ const initialState = {
 };
 
 class SingleProduct extends Component {
-  // static PRODUCT_ID = localStorage.getItem("singleProduct");
   constructor(props) {
     super(props);
     this.state = {
@@ -35,7 +33,6 @@ class SingleProduct extends Component {
       data: [],
       PRODUCT_ID: localStorage.getItem("singleProduct"),
     };
-    this.dispatch = this.props.dispatch;
   }
 
   componentDidMount() {
@@ -54,7 +51,7 @@ class SingleProduct extends Component {
   }
 
   componentDidUpdate() {
-    if (this.state.currentCurrency.label !== this.props.selectorValue.label) {
+    if (this.state.currentCurrency.label !== store.getState().currency.currentCurrency.label) {
       this.setState({ currentCurrency: JSON.parse(localStorage.getItem("currentCurrency")) });
     }
   }
@@ -67,7 +64,7 @@ class SingleProduct extends Component {
       product: data,
       selectedAttrs: this.state.productAttrs.attributes,
     };
-    this.dispatch(addProduct(payload));
+    store.dispatch(addProduct(payload));
 
     const idx = cartItemsFromLS.findIndex(
       (obj) =>
@@ -272,4 +269,4 @@ class SingleProduct extends Component {
   }
 }
 
-export default withUseDispatch(withUseSelector(SingleProduct, getCurrentCurrency));
+export default SingleProduct;

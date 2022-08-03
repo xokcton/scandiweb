@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 
-import { getPages } from "redux/features/pagination/selector";
 import { setCurrentPage, setMaxPagesNumber, setDataStep } from "redux/features/pagination/slice";
-import { withUseDispatch, withUseSelector } from "components/hoc";
 import { GET_CERTAIN_CATEEGORY } from "apollo/queries/categories";
 import { ProductItem, Pagination } from "components/ui";
 import { client } from "apollo";
+import { store } from "redux/store";
 
 import { CategoryContainer } from "./CategoryContainer";
 import Loader from "assets/loader.gif";
@@ -13,13 +12,11 @@ import Loader from "assets/loader.gif";
 class Category extends Component {
   constructor(props) {
     super(props);
-    const dataFromLS = JSON.parse(localStorage.getItem("currentCategory"));
-    const name = dataFromLS ? dataFromLS.all[dataFromLS.current].name : "all";
-    this.dispatch = this.props.dispatch;
     this.state = {
-      currentPage: this.props.selectorValue.currentPage,
+      currentPage: store.getState().pagination.pages.currentPage,
       partialData: JSON.parse(localStorage.getItem("partialData")) || [],
-      SELECTED_CATEGORY: name,
+      SELECTED_CATEGORY:
+        store.getState().category.categories.all[store.getState().category.categories.current].name,
       loading: true,
       error: false,
       data: [],
@@ -42,44 +39,38 @@ class Category extends Component {
       });
   }
 
-  componentDidUpdate() {
-    const dataFromLS = JSON.parse(localStorage.getItem("currentCategory"));
-    const name = dataFromLS ? dataFromLS.all[dataFromLS.current].name : "all";
+  // componentDidUpdate() {
+  //   const dataFromLS = JSON.parse(localStorage.getItem("currentCategory"));
+  //   const name = dataFromLS ? dataFromLS.all[dataFromLS.current].name : "all";
 
-    if (
-      this.state.currentCategoryToggler.current !==
-      JSON.parse(localStorage.getItem("currentCategory")).current
-    ) {
-      this.setState({
-        currentCategoryToggler: JSON.parse(localStorage.getItem("currentCategory")),
-        ELECTED_CATEGORY: name,
-      });
-      // TODO: not updating
-      console.log("updating");
-      client
-        .query({
-          query: GET_CERTAIN_CATEEGORY,
-          variables: { name },
-        })
-        .then((result) => {
-          this.setState({ partialData: [], data: result.data, loading: false });
-          this.configurePages(result.data);
-        })
-        .catch((err) => {
-          this.setState({ error: err });
-        });
-    }
-  }
+  //   if (
+  //     this.state.currentCategoryToggler.current !== store.getState().category.categories.current
+  //   ) {
+  //     this.setState({ ELECTED_CATEGORY: name });
+  //     client
+  //       .query({
+  //         query: GET_CERTAIN_CATEEGORY,
+  //         variables: { name },
+  //       })
+  //       .then((result) => {
+  //         this.setState({ partialData: [], data: result.data, loading: false });
+  //         this.configurePages(result.data);
+  //       })
+  //       .catch((err) => {
+  //         this.setState({ error: err });
+  //       });
+  //   }
+  // }
 
   handleDispatch(pagesCount) {
-    this.dispatch(setCurrentPage(1));
-    this.dispatch(setMaxPagesNumber(pagesCount));
-    this.dispatch(setDataStep(0));
+    store.dispatch(setCurrentPage(1));
+    store.dispatch(setMaxPagesNumber(pagesCount));
+    store.dispatch(setDataStep(0));
 
     const data = {
-      currentPage: this.props.selectorValue.currentPage,
+      currentPage: store.getState().pagination.pages.currentPage,
       maxPagesNumber: pagesCount,
-      step: this.props.selectorValue.step,
+      step: store.getState().pagination.pages.step,
     };
 
     localStorage.setItem("pages", JSON.stringify(data));
@@ -87,12 +78,12 @@ class Category extends Component {
 
   configurePages(d) {
     const pagesCount = Math.ceil(
-      d.category.products.length / this.props.selectorValue.productsToShow,
+      d.category.products.length / store.getState().pagination.pages.productsToShow,
     );
 
     if (pagesCount > 1 && !this.state.partialData.length) {
       this.handleDispatch(pagesCount);
-      this.updatePartialData(this.props.selectorValue.step, d.category.products);
+      this.updatePartialData(store.getState().pagination.pages.step, d.category.products);
     }
 
     if (pagesCount === 1) {
@@ -106,11 +97,11 @@ class Category extends Component {
   };
 
   calculateStep(idx) {
-    return idx * this.props.selectorValue.productsToShow;
+    return idx * store.getState().pagination.pages.productsToShow;
   }
 
   updatePartialData(step, data) {
-    const copy = [...data].splice(step, this.props.selectorValue.productsToShow);
+    const copy = [...data].splice(step, store.getState().pagination.pages.productsToShow);
 
     this.setState({ partialData: copy });
 
@@ -120,12 +111,12 @@ class Category extends Component {
   setStep = (idx) => {
     const d = {
       currentPage: idx + 1,
-      maxPagesNumber: this.props.selectorValue.maxPagesNumber,
+      maxPagesNumber: store.getState().pagination.pages.maxPagesNumber,
       step: this.calculateStep(idx, this.state.data),
     };
 
-    this.dispatch(setCurrentPage(d.currentPage));
-    this.dispatch(setDataStep(d.step));
+    store.dispatch(setCurrentPage(d.currentPage));
+    store.dispatch(setDataStep(d.step));
 
     this.setState({ currentPage: d.currentPage });
 
@@ -147,7 +138,7 @@ class Category extends Component {
       <CategoryContainer>
         <div className="header">{this.state.data && this.state.data.category.name}</div>
         <div className="products">
-          {this.props.selectorValue.maxPagesNumber > 1
+          {store.getState().pagination.pages.maxPagesNumber > 1
             ? this.state.partialData.map((product) => (
                 <ProductItem key={product.id} product={product} onItemClick={this.onItemClick} />
               ))
@@ -155,7 +146,7 @@ class Category extends Component {
                 <ProductItem key={product.id} product={product} onItemClick={this.onItemClick} />
               ))}
         </div>
-        {this.props.selectorValue.maxPagesNumber > 1 && (
+        {store.getState().pagination.pages.maxPagesNumber > 1 && (
           <div className="pagination-wrapper">
             <Pagination currentPage={this.state.currentPage} setStep={this.setStep} />
           </div>
@@ -165,4 +156,4 @@ class Category extends Component {
   }
 }
 
-export default withUseDispatch(withUseSelector(Category, getPages));
+export default Category;

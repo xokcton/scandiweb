@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 
-import { withUseSelector } from "components/hoc";
-import { getCurrentCurrency } from "redux/features/currency/selector";
+import { store } from "redux/store";
 
 import Cart from "assets/cart.svg";
 import { Link } from "react-router-dom";
@@ -11,17 +10,19 @@ class ProductItem extends Component {
     super(props);
     this.state = {
       currentCurrency: this.props.product.prices.find(
-        (element) => element.currency.label === this.props.selectorValue.label,
+        (element) => element.currency.label === store.getState().currency.currentCurrency.label,
       ),
       isHovering: false,
     };
   }
 
   componentDidUpdate() {
-    if (this.state.currentCurrency.currency.label !== this.props.selectorValue.label) {
+    if (
+      this.state.currentCurrency.currency.label !== store.getState().currency.currentCurrency.label
+    ) {
       this.setState({
         currentCurrency: this.props.product.prices.find(
-          (element) => element.currency.label === this.props.selectorValue.label,
+          (element) => element.currency.label === store.getState().currency.currentCurrency.label,
         ),
       });
     }
@@ -86,4 +87,4 @@ class ProductItem extends Component {
   }
 }
 
-export default withUseSelector(ProductItem, getCurrentCurrency);
+export default ProductItem;

@@ -1,13 +1,10 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
-import { withUseDispatch, withUseSelector } from "components/hoc";
-import { getCart } from "redux/features/cart/selector";
 import { clearItems } from "redux/features/cart/slice";
-import { nestedWithUseSelector } from "components/hoc/useSelector";
-import { getCurrentCurrency } from "redux/features/currency/selector";
 import { getTotalAmount, getTotalPrice } from "utils";
 import { List } from "components/ui";
+import { store } from "redux/store";
 
 import { CartContainer } from "./CartContainer";
 import CartImage from "assets/cart.svg";
@@ -42,7 +39,7 @@ class Cart extends Component {
   }
 
   openCart = () => {
-    if (this.props.selectorValue.length === 0) {
+    if (store.getState().cart.items.length === 0) {
       alert("Add at least one element first!");
       return;
     }
@@ -51,7 +48,7 @@ class Cart extends Component {
 
   handleClearBag = (e) => {
     e.preventDefault();
-    this.props.dispatch(clearItems());
+    store.dispatch(clearItems());
     localStorage.removeItem("cartItems");
     this.setState({ isCartOpen: false });
   };
@@ -61,10 +58,10 @@ class Cart extends Component {
   };
 
   render() {
-    const totalAmount = getTotalAmount(this.props.selectorValue.slice());
+    const totalAmount = getTotalAmount(store.getState().cart.items.slice());
     const totalPrice = getTotalPrice(
-      this.props.selectorValue.slice(),
-      this.props.nestedSelectorValue.label,
+      store.getState().cart.items.slice(),
+      store.getState().currency.currentCurrency.label,
     );
 
     return (
@@ -81,12 +78,12 @@ class Cart extends Component {
                 {totalAmount === 1 ? <p>{totalAmount} item</p> : <p>{totalAmount} items</p>}
               </div>
               <div className="itemsWrapper">
-                <List currentCurrency={this.props.nestedSelectorValue} />
+                <List currentCurrency={store.getState().currency.currentCurrency} />
               </div>
               <div className="total">
                 <b>Total</b>
                 <b>
-                  {this.props.nestedSelectorValue.symbol}
+                  {store.getState().currency.currentCurrency.symbol}
                   {totalPrice.toFixed(2)}
                 </b>
               </div>
@@ -104,6 +101,4 @@ class Cart extends Component {
   }
 }
 
-export default withUseDispatch(
-  nestedWithUseSelector(withUseSelector(Cart, getCart), getCurrentCurrency),
-);
+export default Cart;

@@ -6,6 +6,8 @@ export const CartPageContainer = styled.div`
     font-size: 20px;
     font-weight: bold;
     .goBack {
+      text-decoration: none;
+      color: #1D1F22;
       cursor: pointer;
       transition: all 0.2s ease-in-out;
       &:hover {
