@@ -1,26 +1,27 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import { setCurrentPage, setMaxPagesNumber, setDataStep } from "redux/features/pagination/slice";
-import { GET_CERTAIN_CATEEGORY } from "apollo/queries/categories";
-import { ProductItem, Pagination } from "components/ui";
-import { client } from "apollo";
-import { store } from "redux/store";
+import { setCurrentPage, setMaxPagesNumber, setDataStep } from 'redux/features/pagination/slice';
+import { GET_CERTAIN_CATEEGORY } from 'apollo/queries/categories';
+import { ProductItem, Pagination, Header } from 'components/ui';
+import { client } from 'apollo';
+import { store } from 'redux/store';
 
-import { CategoryContainer } from "./CategoryContainer";
-import Loader from "assets/loader.gif";
+import { CategoryContainer } from './CategoryContainer';
+import Loader from 'assets/loader.gif';
 
 class Category extends Component {
   constructor(props) {
     super(props);
     this.state = {
       currentPage: store.getState().pagination.pages.currentPage,
-      partialData: JSON.parse(localStorage.getItem("partialData")) || [],
+      partialData: JSON.parse(localStorage.getItem('partialData')) || [],
       SELECTED_CATEGORY:
-        store.getState().category.categories.all[store.getState().category.categories.current].name,
+        store.getState().category.categories.all[store.getState().category.categories.current]
+          ?.name || 'all',
       loading: true,
       error: false,
       data: [],
-      currentCategoryToggler: JSON.parse(localStorage.getItem("currentCategory")),
+      currentCategoryToggler: JSON.parse(localStorage.getItem('currentCategory')),
     };
   }
 
@@ -39,29 +40,6 @@ class Category extends Component {
       });
   }
 
-  // componentDidUpdate() {
-  //   const dataFromLS = JSON.parse(localStorage.getItem("currentCategory"));
-  //   const name = dataFromLS ? dataFromLS.all[dataFromLS.current].name : "all";
-
-  //   if (
-  //     this.state.currentCategoryToggler.current !== store.getState().category.categories.current
-  //   ) {
-  //     this.setState({ ELECTED_CATEGORY: name });
-  //     client
-  //       .query({
-  //         query: GET_CERTAIN_CATEEGORY,
-  //         variables: { name },
-  //       })
-  //       .then((result) => {
-  //         this.setState({ partialData: [], data: result.data, loading: false });
-  //         this.configurePages(result.data);
-  //       })
-  //       .catch((err) => {
-  //         this.setState({ error: err });
-  //       });
-  //   }
-  // }
-
   handleDispatch(pagesCount) {
     store.dispatch(setCurrentPage(1));
     store.dispatch(setMaxPagesNumber(pagesCount));
@@ -73,7 +51,7 @@ class Category extends Component {
       step: store.getState().pagination.pages.step,
     };
 
-    localStorage.setItem("pages", JSON.stringify(data));
+    localStorage.setItem('pages', JSON.stringify(data));
   }
 
   configurePages(d) {
@@ -88,12 +66,12 @@ class Category extends Component {
 
     if (pagesCount === 1) {
       this.handleDispatch(pagesCount);
-      localStorage.removeItem("partialData");
+      localStorage.removeItem('partialData');
     }
   }
 
   onItemClick = (id) => {
-    localStorage.setItem("singleProduct", id);
+    localStorage.setItem('singleProduct', id);
   };
 
   calculateStep(idx) {
@@ -105,7 +83,7 @@ class Category extends Component {
 
     this.setState({ partialData: copy });
 
-    localStorage.setItem("partialData", JSON.stringify(copy));
+    localStorage.setItem('partialData', JSON.stringify(copy));
   }
 
   setStep = (idx) => {
@@ -122,7 +100,7 @@ class Category extends Component {
 
     this.updatePartialData(d.step, this.state.data.category.products);
 
-    localStorage.setItem("pages", JSON.stringify(d));
+    localStorage.setItem('pages', JSON.stringify(d));
   };
 
   render() {
@@ -135,23 +113,36 @@ class Category extends Component {
     else this.configurePages(this.state.data);
 
     return (
-      <CategoryContainer>
-        <div className="header">{this.state.data && this.state.data.category.name}</div>
-        <div className="products">
-          {store.getState().pagination.pages.maxPagesNumber > 1
-            ? this.state.partialData.map((product) => (
-                <ProductItem key={product.id} product={product} onItemClick={this.onItemClick} />
-              ))
-            : this.state.data.category.products.map((product) => (
-                <ProductItem key={product.id} product={product} onItemClick={this.onItemClick} />
-              ))}
+      <>
+        <Header />
+        <div className="content">
+          <CategoryContainer>
+            <div className="header">{this.state.data && this.state.data.category.name}</div>
+            <div className="products">
+              {store.getState().pagination.pages.maxPagesNumber > 1
+                ? this.state.partialData.map((product) => (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      onItemClick={this.onItemClick}
+                    />
+                  ))
+                : this.state.data.category.products.map((product) => (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      onItemClick={this.onItemClick}
+                    />
+                  ))}
+            </div>
+            {store.getState().pagination.pages.maxPagesNumber > 1 && (
+              <div className="pagination-wrapper">
+                <Pagination currentPage={this.state.currentPage} setStep={this.setStep} />
+              </div>
+            )}
+          </CategoryContainer>
         </div>
-        {store.getState().pagination.pages.maxPagesNumber > 1 && (
-          <div className="pagination-wrapper">
-            <Pagination currentPage={this.state.currentPage} setStep={this.setStep} />
-          </div>
-        )}
-      </CategoryContainer>
+      </>
     );
   }
 }
